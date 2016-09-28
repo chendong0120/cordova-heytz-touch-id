@@ -1,7 +1,7 @@
 
 # 引用 [cordova-plugin-touchid](https://github.com/EddyVerbruggen/cordova-plugin-touchid.git)
 #新增 Android 
-    1.android 6.0指纹解锁
+    1.android 6.0 指纹解锁
     
 #####需要在build.gradle文件中添加 android-support-v4 的引用
     
@@ -9,6 +9,34 @@
         ...
         compile "com.android.support:support-core-utils:24.2.1"
     }
+
+#####各个型号说明
+    1.华为
+    
+        通过指纹模块实现app的登录鉴权，可通过android 6.0的公开接口实现指纹的对接。
+        目前搭载EMUI4.0 （基于android 6.0深度定制的系统）的华为手机均支持android官方对指纹的公开开放接口。
+        EMUI4.0以下系统的指纹接口属于华为内部私有接口，暂不开放。
+    2.三星
+        
+        暂未开发
+    3.Google Nexus
+        
+        因为Google Android 6.0（API 23） 以上都支持
+    4.小米
+      
+        暂未开发
+    5.乐视
+    
+        暂未开发
+    6.魅族
+        
+        暂未开发
+    7.OPPO
+    
+        暂未开发
+    8.联想
+    
+        暂未开发
     
 # Cordova TouchID Plugin
 by [Eddy Verbruggen](http://twitter.com/eddyverbruggen)
