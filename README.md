@@ -4,6 +4,8 @@
     1.android 6.0 指纹解锁
     
 #####需要在build.gradle文件中添加 android-support-v4 的引用
+  [官方文档1](https://developer.android.com/topic/libraries/support-library/features.html)
+  [官方文档2](https://developer.android.com/topic/libraries/support-library/setup.html)
     
     dependencies {
         ...
