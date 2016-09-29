@@ -4,24 +4,22 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.util.Log;
-import android.widget.Toast;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by chendongdong on 16/9/19.
  */
 
 public class HeytzTouchid extends CordovaPlugin {
-    private Handler handler;
     private Context context;
     private static final String IS_AVAILABLE = "isAvailable";
     private static final String VERIFY_FINGER_PRINT = "verifyFingerprint";
@@ -29,6 +27,7 @@ public class HeytzTouchid extends CordovaPlugin {
     private static final String VERIFY_FINGER_WCPFAEPL = "verifyFingerprintWithCustomPasswordFallbackAndEnterPasswordLabel";
     private final static String TAG = "HeytzTouchid:";
     private FingerprintManagerCompat manager;
+    private CallbackContext _callbackContext;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -44,6 +43,7 @@ public class HeytzTouchid extends CordovaPlugin {
             return true;
         }
         if (action.equals(VERIFY_FINGER_PRINT)) {
+            _callbackContext = callbackContext;
             /**
              * 开始验证，什么时候停止由系统来确定，如果验证成功，那么系统会关系sensor，如果失败，则允许
              * 多次尝试，如果依旧失败，则会拒绝一段时间，然后关闭sensor，过一段时候之后再重新允许尝试
@@ -55,9 +55,11 @@ public class HeytzTouchid extends CordovaPlugin {
             return true;
         }
         if (action.equals(VERIFY_FINGER_WCPF)) {
+            callbackContext.error("暂未开放");
             return true;
         }
         if (action.equals(VERIFY_FINGER_WCPFAEPL)) {
+            callbackContext.error("暂未开放");
             return true;
         }
         return false;
@@ -75,8 +77,16 @@ public class HeytzTouchid extends CordovaPlugin {
         if (errorMessage == null) {
             callbackContext.success();
         } else {
-            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+            JSONObject dataJson = new JSONObject();
+            try {
+                dataJson.put("errorMessage", errorMessage);
+                dataJson.put("SDK_Int", version);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             callbackContext.error(errorMessage);
+
         }
     }
 
@@ -99,24 +109,48 @@ public class HeytzTouchid extends CordovaPlugin {
         return str;
     }
 
-    public class MyCallBack extends FingerprintManagerCompat.AuthenticationCallback {
+    public class MyCallBack extends FingerprintManagerCompat.AuthenticationCallback  {
         private static final String TAG = "MyCallBack";
 
         // 当出现错误的时候回调此函数，比如多次尝试都失败了的时候，errString是错误信息
         @Override
         public void onAuthenticationError(int errMsgId, CharSequence errString) {
-            Log.d(TAG, "onAuthenticationError: " + errString);
+            Log(TAG, "onAuthenticationError: " + errString);
+            JSONObject dataJson = new JSONObject();
+            try {
+                dataJson.put("errMsgId", errMsgId);
+                dataJson.put("CharSequence", errString.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            _callbackContext.error(dataJson);
         }
 
         // 当指纹验证失败的时候会回调此函数，失败之后允许多次尝试，失败次数过多会停止响应一段时间然后再停止sensor的工作
         @Override
         public void onAuthenticationFailed() {
-            Log.d(TAG, "onAuthenticationFailed: " + "验证失败");
+            JSONObject dataJson = new JSONObject();
+            Log(TAG, "onAuthenticationFailed: " + "验证失败");
+            try {
+                dataJson.put("type", "onAuthenticationFailed");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            _callbackContext.error(dataJson);
         }
 
         @Override
         public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-            Log.d(TAG, "onAuthenticationHelp: " + helpString);
+            Log(TAG, "onAuthenticationHelp: " + helpString);
+            JSONObject dataJson = new JSONObject();
+            try {
+                dataJson.put("type", "onAuthenticationHelp");
+                dataJson.put("helpMsgId", helpMsgId);
+                dataJson.put("helpString", helpString.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            _callbackContext.error(dataJson);
         }
 
         // 当验证的指纹成功时会回调此函数，然后不再监听指纹sensor
@@ -124,6 +158,13 @@ public class HeytzTouchid extends CordovaPlugin {
         public void onAuthenticationSucceeded(FingerprintManagerCompat.AuthenticationResult
                                                       result) {
             Log.d(TAG, "onAuthenticationSucceeded: " + "验证成功");
+            JSONObject dataJson = new JSONObject();
+            try {
+                dataJson.put("type", "onAuthenticationSucceeded");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            _callbackContext.success(dataJson);
         }
     }
 
